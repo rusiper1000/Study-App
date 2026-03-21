@@ -238,9 +238,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="action" id="saveStudyBtn">공부시간 저장</button>
-            <button class="secondary" id="loadTodayBtn">오늘로 불러오기</button>
-            <button class="secondary" id="resetSubjectsBtn">과목 전체 초기화</button>
+            <button class="action" id="saveStudyBtn">저장</button>
           </div>
         </div>
       </div>
@@ -338,8 +336,6 @@
       studyNote: document.getElementById('studyNote'),
       totalHoursDisplay: document.getElementById('totalHoursDisplay'),
       saveStudyBtn: document.getElementById('saveStudyBtn'),
-      loadTodayBtn: document.getElementById('loadTodayBtn'),
-      resetSubjectsBtn: document.getElementById('resetSubjectsBtn'),
       exportBtn: document.getElementById('exportBtn'),
       importBtn: document.getElementById('importBtn'),
       importFile: document.getElementById('importFile'),
@@ -381,8 +377,6 @@
     });
 
     el.saveStudyBtn.addEventListener('click', saveStudy);
-    el.loadTodayBtn.addEventListener('click', loadToday);
-    el.resetSubjectsBtn.addEventListener('click', resetSubjects);
     el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
     el.exportBtn.addEventListener('click', exportData);
@@ -519,10 +513,6 @@
       updateTotalDisplay();
     }
 
-    function resetSubjects() {
-      Object.values(el.subjectInputs).forEach(input => input.value = '');
-      updateTotalDisplay();
-    }
 
     function saveStudy() {
       const date = el.studyDate.value;
@@ -541,18 +531,6 @@
       alert('공부시간이 저장되었습니다.');
     }
 
-    function loadToday() {
-      const today = formatDate(new Date());
-      el.studyDate.value = today;
-      const record = state.data.studies[today];
-      if (record) {
-        setSubjectInputs(record.subjects);
-        el.studyNote.value = record.note || '';
-      } else {
-        resetSubjects();
-        el.studyNote.value = '';
-      }
-    }
 
     function exportData() {
       const payload = {
@@ -691,30 +669,17 @@
         const classes = ['day', `heat-${getHeatLevel(hours, maxMonthHours)}`];
         if (date === today) classes.push('today');
         if (date === state.selectedDate) classes.push('selected');
-        const majorSubject = study ? getMajorSubject(study.subjects) : '';
 
         cells.push(`
           <div class="${classes.join(' ')}" onclick="selectDate('${date}')">
             <div class="day-num">${d}</div>
             ${study ? `<span class="badge">${trimZero(study.totalHours)}h</span>` : ''}
-            ${majorSubject ? `<div class="mini-text">${majorSubject}</div>` : ''}
           </div>
         `);
       }
       el.calendarGrid.innerHTML = cells.join('');
     }
 
-    function getMajorSubject(subjects) {
-      let bestKey = '';
-      let bestValue = 0;
-      for (const [key, value] of Object.entries(normalizeSubjects(subjects))) {
-        if (value > bestValue) {
-          bestKey = key;
-          bestValue = value;
-        }
-      }
-      return bestKey ? `${SUBJECTS[bestKey]} ${trimZero(bestValue)}h` : '';
-    }
 
     function getHeatLevel(hours, maxHours) {
       if (!hours || maxHours <= 0) return 0;
