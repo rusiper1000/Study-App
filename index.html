@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>공부시간 기록</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      color: white;
+      border-radius: 24px;
+      padding: 22px 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: 1.6rem;
+      font-weight: 800;
+    }
+
+    .hero p {
+      margin: 0;
+      opacity: 0.9;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+
+    .summary-card,
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .summary-card {
+      padding: 14px;
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+    }
+
+    .summary-card .value {
+      font-size: 1.28rem;
+      font-weight: 800;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: #e5e7eb;
+      color: #374151;
+      padding: 12px 10px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card { padding: 16px; margin-bottom: 14px; }
+
+    .card h2 {
+      font-size: 1.08rem;
+      margin: 0 0 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 84px;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button.action,
+    button.secondary,
+    button.danger {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.action {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+
+    button.secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    button.danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .records {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .record-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .record-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .record-date {
+      font-weight: 800;
+    }
+
+    .record-hours {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .record-note {
+      color: var(--muted);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      font-size: 0.92rem;
+    }
+
+    .calendar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .calendar-grid,
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 6px 0;
+      font-weight: 700;
+    }
+
+    .day {
+      min-height: 86px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .day.empty {
+      background: transparent;
+      border-style: dashed;
+      cursor: default;
+    }
+
+    .day.today {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+
+    .day.selected {
+      background: var(--primary-soft);
+    }
+
+    .day-num {
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      width: fit-content;
+    }
+
+    .badge.study {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge.event {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .mini-text {
+      font-size: 0.74rem;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chart-wrap {
+      margin-top: 8px;
+    }
+
+    canvas {
+      width: 100%;
+      background: #fff;
+      border-radius: 14px;
+    }
+
+    .hint {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px 10px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .summary-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .row-2 { grid-template-columns: 1fr; }
+      .day { min-height: 74px; padding: 6px; }
+      .mini-text { font-size: 0.68rem; }
+      .badge { font-size: 0.66rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <h1>공부시간 기록</h1>
+      <p>타이머 없이, 하루 공부시간만 가볍게 기록하는 웹앱입니다. 입력 · 캘린더 · 그래프만 깔끔하게 담았습니다.</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="summary-card">
+        <div class="label">오늘</div>
+        <div class="value" id="todayHours">0시간</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">이번 달</div>
+        <div class="value" id="monthHours">0시간</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">연속 기록</div>
+        <div class="value" id="streakDays">0일</div>
+      </div>
+    </section>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="input">입력</button>
+      <button class="tab-btn" data-tab="calendar">캘린더</button>
+      <button class="tab-btn" data-tab="chart">그래프</button>
+    </div>
+
+    <section class="panel active" id="panel-input">
+      <div class="card">
+        <h2>공부시간 입력</h2>
+        <div class="form-grid">
+          <div class="row-2">
+            <div>
+              <label for="studyDate">날짜</label>
+              <input id="studyDate" type="date" />
+            </div>
+            <div>
+              <label for="studyHours">공부시간</label>
+              <input id="studyHours" type="number" min="0" max="24" step="0.5" placeholder="예: 6.5" />
+            </div>
+          </div>
+          <div>
+            <label for="studyNote">메모</label>
+            <textarea id="studyNote" placeholder="예: 행정법 3시간, 민법 2시간, 기출 1시간"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="action" id="saveStudyBtn">공부시간 저장</button>
+            <button class="secondary" id="loadTodayBtn">오늘로 불러오기</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>일정 / 시험일 입력</h2>
+        <div class="form-grid">
+          <div class="row-2">
+            <div>
+              <label for="eventDate">날짜</label>
+              <input id="eventDate" type="date" />
+            </div>
+            <div>
+              <label for="eventTitle">제목</label>
+              <input id="eventTitle" type="text" placeholder="예: 행정사 1차 시험" />
+            </div>
+          </div>
+          <div>
+            <label for="eventNote">메모</label>
+            <textarea id="eventNote" placeholder="예: 시험장, 준비물, 중요 체크사항"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="action" id="saveEventBtn">일정 저장</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>최근 기록</h2>
+        <div id="recentRecords" class="records"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-calendar">
+      <div class="card">
+        <div class="calendar-head">
+          <button class="secondary" id="prevMonthBtn">이전</button>
+          <div class="calendar-title" id="calendarTitle"></div>
+          <button class="secondary" id="nextMonthBtn">다음</button>
+        </div>
+        <div class="weekdays">
+          <div class="weekday">일</div>
+          <div class="weekday">월</div>
+          <div class="weekday">화</div>
+          <div class="weekday">수</div>
+          <div class="weekday">목</div>
+          <div class="weekday">금</div>
+          <div class="weekday">토</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="card">
+        <h2 id="selectedDateTitle">날짜 상세</h2>
+        <div id="selectedDateDetail" class="records"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-chart">
+      <div class="card">
+        <h2>최근 30일 공부시간 그래프</h2>
+        <div class="chart-wrap">
+          <canvas id="studyChart" width="700" height="320"></canvas>
+        </div>
+        <div class="hint">막대 높이로 날짜별 공부시간을 확인할 수 있습니다. 값이 없으면 0시간으로 표시됩니다.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'study-time-tracker-v1';
+    const state = {
+      selectedTab: 'input',
+      calendarYear: new Date().getFullYear(),
+      calendarMonth: new Date().getMonth(),
+      selectedDate: formatDate(new Date()),
+      data: loadData()
+    };
+
+    const el = {
+      todayHours: document.getElementById('todayHours'),
+      monthHours: document.getElementById('monthHours'),
+      streakDays: document.getElementById('streakDays'),
+      studyDate: document.getElementById('studyDate'),
+      studyHours: document.getElementById('studyHours'),
+      studyNote: document.getElementById('studyNote'),
+      saveStudyBtn: document.getElementById('saveStudyBtn'),
+      loadTodayBtn: document.getElementById('loadTodayBtn'),
+      eventDate: document.getElementById('eventDate'),
+      eventTitle: document.getElementById('eventTitle'),
+      eventNote: document.getElementById('eventNote'),
+      saveEventBtn: document.getElementById('saveEventBtn'),
+      recentRecords: document.getElementById('recentRecords'),
+      calendarTitle: document.getElementById('calendarTitle'),
+      calendarGrid: document.getElementById('calendarGrid'),
+      prevMonthBtn: document.getElementById('prevMonthBtn'),
+      nextMonthBtn: document.getElementById('nextMonthBtn'),
+      selectedDateTitle: document.getElementById('selectedDateTitle'),
+      selectedDateDetail: document.getElementById('selectedDateDetail'),
+      studyChart: document.getElementById('studyChart')
+    };
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    el.saveStudyBtn.addEventListener('click', saveStudy);
+    el.loadTodayBtn.addEventListener('click', loadToday);
+    el.saveEventBtn.addEventListener('click', saveEvent);
+    el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+    el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
+    initialize();
+
+    function initialize() {
+      const today = formatDate(new Date());
+      el.studyDate.value = today;
+      el.eventDate.value = today;
+      renderAll();
+    }
+
+    function loadData() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { studies: {}, events: {} };
+      } catch {
+        return { studies: {}, events: {} };
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    }
+
+    function switchTab(tab) {
+      state.selectedTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === `panel-${tab}`);
+      });
+      if (tab === 'chart') drawChart();
+      if (tab === 'calendar') renderCalendar();
+    }
+
+    function saveStudy() {
+      const date = el.studyDate.value;
+      const hours = parseFloat(el.studyHours.value);
+      const note = el.studyNote.value.trim();
+
+      if (!date) return alert('날짜를 선택해 주세요.');
+      if (Number.isNaN(hours) || hours < 0 || hours > 24) return alert('공부시간을 0~24 사이로 입력해 주세요.');
+
+      state.data.studies[date] = { hours, note };
+      saveData();
+      state.selectedDate = date;
+      renderAll();
+      alert('공부시간이 저장되었습니다.');
+    }
+
+    function saveEvent() {
+      const date = el.eventDate.value;
+      const title = el.eventTitle.value.trim();
+      const note = el.eventNote.value.trim();
+
+      if (!date) return alert('날짜를 선택해 주세요.');
+      if (!title) return alert('일정 제목을 입력해 주세요.');
+
+      if (!state.data.events[date]) state.data.events[date] = [];
+      state.data.events[date].push({ title, note, createdAt: Date.now() });
+      saveData();
+      state.selectedDate = date;
+      el.eventTitle.value = '';
+      el.eventNote.value = '';
+      renderAll();
+      alert('일정이 저장되었습니다.');
+    }
+
+    function loadToday() {
+      const today = formatDate(new Date());
+      el.studyDate.value = today;
+      const record = state.data.studies[today];
+      el.studyHours.value = record ? record.hours : '';
+      el.studyNote.value = record ? record.note : '';
+    }
+
+    function renderAll() {
+      renderSummary();
+      renderRecentRecords();
+      renderCalendar();
+      renderSelectedDate();
+      drawChart();
+    }
+
+    function renderSummary() {
+      const today = formatDate(new Date());
+      const now = new Date();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const todayRecord = state.data.studies[today];
+
+      const monthTotal = Object.entries(state.data.studies)
+        .filter(([date]) => date.startsWith(monthKey))
+        .reduce((sum, [, v]) => sum + Number(v.hours || 0), 0);
+
+      el.todayHours.textContent = `${todayRecord ? trimZero(todayRecord.hours) : 0}시간`;
+      el.monthHours.textContent = `${trimZero(monthTotal)}시간`;
+      el.streakDays.textContent = `${calcStreak()}일`;
+    }
+
+    function renderRecentRecords() {
+      const entries = Object.entries(state.data.studies)
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .slice(0, 10);
+
+      if (!entries.length) {
+        el.recentRecords.innerHTML = '<div class="empty-state">아직 저장된 공부기록이 없습니다.</div>';
+        return;
+      }
+
+      el.recentRecords.innerHTML = entries.map(([date, item]) => `
+        <div class="record-item">
+          <div class="record-top">
+            <div class="record-date">${date}</div>
+            <div class="record-hours">${trimZero(item.hours)}시간</div>
+          </div>
+          <div class="record-note">${escapeHtml(item.note || '메모 없음')}</div>
+          <div class="btn-row">
+            <button class="secondary" onclick="editStudy('${date}')">불러오기</button>
+            <button class="danger" onclick="deleteStudy('${date}')">삭제</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCalendar() {
+      const year = state.calendarYear;
+      const month = state.calendarMonth;
+      const firstDay = new Date(year, month, 1);
+      const startWeekday = firstDay.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = formatDate(new Date());
+
+      el.calendarTitle.textContent = `${year}년 ${month + 1}월`;
+      const cells = [];
+
+      for (let i = 0; i < startWeekday; i++) {
+        cells.push('<div class="day empty"></div>');
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const study = state.data.studies[date];
+        const events = state.data.events[date] || [];
+        const classes = ['day'];
+        if (date === today) classes.push('today');
+        if (date === state.selectedDate) classes.push('selected');
+
+        cells.push(`
+          <div class="${classes.join(' ')}" onclick="selectDate('${date}')">
+            <div class="day-num">${day}</div>
+            ${study ? `<span class="badge study">${trimZero(study.hours)}h</span>` : ''}
+            ${events[0] ? `<span class="badge event">일정 ${events.length}</span>` : ''}
+            ${events[0] ? `<div class="mini-text">${escapeHtml(events[0].title)}</div>` : ''}
+          </div>
+        `);
+      }
+
+      el.calendarGrid.innerHTML = cells.join('');
+    }
+
+    function renderSelectedDate() {
+      const date = state.selectedDate;
+      const study = state.data.studies[date];
+      const events = state.data.events[date] || [];
+      el.selectedDateTitle.textContent = `${date} 상세`;
+
+      let html = '';
+      if (study) {
+        html += `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-date">공부기록</div>
+              <div class="record-hours">${trimZero(study.hours)}시간</div>
+            </div>
+            <div class="record-note">${escapeHtml(study.note || '메모 없음')}</div>
+          </div>
+        `;
+      }
+
+      if (events.length) {
+        html += events.map((event, index) => `
+          <div class="record-item">
+            <div class="record-top">
+              <div class="record-date">${escapeHtml(event.title)}</div>
+              <div class="badge event">일정</div>
+            </div>
+            <div class="record-note">${escapeHtml(event.note || '메모 없음')}</div>
+            <div class="btn-row">
+              <button class="danger" onclick="deleteEvent('${date}', ${index})">일정 삭제</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      el.selectedDateDetail.innerHTML = html || '<div class="empty-state">선택한 날짜에 저장된 내용이 없습니다.</div>';
+    }
+
+    function changeMonth(offset) {
+      state.calendarMonth += offset;
+      if (state.calendarMonth < 0) {
+        state.calendarMonth = 11;
+        state.calendarYear -= 1;
+      }
+      if (state.calendarMonth > 11) {
+        state.calendarMonth = 0;
+        state.calendarYear += 1;
+      }
+      renderCalendar();
+    }
+
+    function drawChart() {
+      const canvas = el.studyChart;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const days = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = formatDate(d);
+        days.push({
+          date: key,
+          label: `${d.getMonth() + 1}/${d.getDate()}`,
+          value: Number((state.data.studies[key] || {}).hours || 0)
+        });
+      }
+
+      const max = Math.max(8, ...days.map(d => d.value));
+      const left = 36;
+      const right = 12;
+      const top = 18;
+      const bottom = 34;
+      const chartW = width - left - right;
+      const chartH = height - top - bottom;
+      const barW = chartW / days.length - 6;
+
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, height - bottom);
+      ctx.lineTo(width - right, height - bottom);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '12px sans-serif';
+      for (let i = 0; i <= 4; i++) {
+        const value = (max / 4) * i;
+        const y = height - bottom - (chartH * i / 4);
+        ctx.fillText(trimZero(value), 6, y + 4);
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(width - right, y);
+        ctx.stroke();
+      }
+
+      days.forEach((d, idx) => {
+        const x = left + idx * (barW + 6) + 3;
+        const h = d.value === 0 ? 2 : (d.value / max) * chartH;
+        const y = height - bottom - h;
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        roundRect(ctx, x, y, barW, h, 6);
+        ctx.fill();
+
+        if (idx % 5 === 0 || idx === days.length - 1) {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '11px sans-serif';
+          ctx.save();
+          ctx.translate(x + barW / 2, height - 10);
+          ctx.rotate(-0.45);
+          ctx.fillText(d.label, 0, 0);
+          ctx.restore();
+        }
+      });
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + width, y, x + width, y + height, r);
+      ctx.arcTo(x + width, y + height, x, y + height, r);
+      ctx.arcTo(x, y + height, x, y, r);
+      ctx.arcTo(x, y, x + width, y, r);
+      ctx.closePath();
+    }
+
+    function calcStreak() {
+      let streak = 0;
+      const d = new Date();
+      while (true) {
+        const key = formatDate(d);
+        const record = state.data.studies[key];
+        if (record && Number(record.hours) > 0) {
+          streak += 1;
+          d.setDate(d.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function trimZero(value) {
+      const num = Number(value || 0);
+      return Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '');
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    window.selectDate = function(date) {
+      state.selectedDate = date;
+      const selected = new Date(date);
+      state.calendarYear = selected.getFullYear();
+      state.calendarMonth = selected.getMonth();
+      renderCalendar();
+      renderSelectedDate();
+    }
+
+    window.editStudy = function(date) {
+      const item = state.data.studies[date];
+      if (!item) return;
+      switchTab('input');
+      el.studyDate.value = date;
+      el.studyHours.value = item.hours;
+      el.studyNote.value = item.note || '';
+      state.selectedDate = date;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.deleteStudy = function(date) {
+      if (!confirm(`${date} 공부기록을 삭제할까요?`)) return;
+      delete state.data.studies[date];
+      saveData();
+      renderAll();
+    }
+
+    window.deleteEvent = function(date, index) {
+      if (!confirm('이 일정을 삭제할까요?')) return;
+      state.data.events[date].splice(index, 1);
+      if (!state.data.events[date].length) delete state.data.events[date];
+      saveData();
+      renderAll();
+    }
+  </script>
+</body>
+</html>
