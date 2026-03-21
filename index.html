@@ -11,430 +11,78 @@
   <link rel="apple-touch-icon" href="./icons/icon-180.png" />
   <title>공부시간 기록</title>
   <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --primary: #2563eb;
-      --primary-soft: #dbeafe;
-      --danger: #dc2626;
-      --success: #16a34a;
-      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .app {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
-    }
-
-    .hero {
-      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-      color: white;
-      border-radius: 24px;
-      padding: 22px 18px;
-      box-shadow: var(--shadow);
-      margin-bottom: 16px;
-    }
-
-    .hero h1 {
-      margin: 0;
-      font-size: 1.6rem;
-      font-weight: 800;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin: 14px 0 18px;
-    }
-
-    .summary-card,
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(229, 231, 235, 0.9);
-    }
-
-    .summary-card {
-      padding: 14px;
-    }
-
-    .summary-card .label {
-      color: var(--muted);
-      font-size: 0.82rem;
-      margin-bottom: 6px;
-    }
-
-    .summary-card .value {
-      font-size: 1.18rem;
-      font-weight: 800;
-      line-height: 1.2;
-    }
-
-    .summary-card .sub {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .tab-btn {
-      border: none;
-      background: #e5e7eb;
-      color: #374151;
-      padding: 12px 10px;
-      border-radius: 14px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .card { padding: 16px; margin-bottom: 14px; }
-
-    .card h2 {
-      font-size: 1.08rem;
-      margin: 0 0 14px;
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    input, textarea {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      display: block;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 13px;
-      font-size: 1rem;
-      background: #fff;
-      color: var(--text);
-      appearance: none;
-      -webkit-appearance: none;
-    }
-
-    input[type="date"] {
-      line-height: 1.2;
-      min-height: 48px;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 84px;
-    }
-
-    .row-2 {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 10px;
-      align-items: end;
-    }
-
-    .btn-row, .quick-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .quick-btn,
-    button.action,
-    button.secondary,
-    button.danger {
-      border: none;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    button.action {
-      background: var(--primary);
-      color: white;
-      flex: 1;
-    }
-
-    button.secondary, .quick-btn {
-      background: #eef2ff;
-      color: #3730a3;
-    }
-
-    button.danger {
-      background: #fee2e2;
-      color: var(--danger);
-    }
-
-    .backup-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .records {
-      display: grid;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .record-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .record-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .record-date {
-      font-weight: 800;
-    }
-
-    .record-hours {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--primary);
-      white-space: nowrap;
-    }
-
-    .record-note {
-      color: var(--muted);
-      line-height: 1.45;
-      white-space: pre-wrap;
-      font-size: 0.92rem;
-    }
-
-    .calendar-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 8px;
-    }
-
-    .calendar-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      text-align: center;
-      flex: 1;
-    }
-
-    .calendar-grid,
-    .weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-
-    .weekday {
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--muted);
-      padding: 6px 0;
-      font-weight: 700;
-    }
-
-    .day {
-      min-height: 92px;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 8px;
-      position: relative;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: transform .12s ease;
-    }
-
-    .day:active { transform: scale(0.98); }
-
-    .day.empty {
-      background: transparent;
-      border-style: dashed;
-      cursor: default;
-    }
-
-    .day.today {
-      outline: 2px solid var(--primary);
-      outline-offset: -2px;
-    }
-
-    .day.selected {
-      box-shadow: inset 0 0 0 2px rgba(37, 99, 235, .18);
-    }
-
-    .day-num {
-      font-size: 0.88rem;
-      font-weight: 800;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      width: fit-content;
-    }
-
-    .badge.study {
-      background: rgba(255,255,255,0.88);
-      color: #1d4ed8;
-    }
-
-    .mini-text {
-      font-size: 0.74rem;
-      color: var(--muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .heat-0 { background: #ffffff; }
-    .heat-1 { background: #eff6ff; }
-    .heat-2 { background: #dbeafe; }
-    .heat-3 { background: #bfdbfe; }
-    .heat-4 { background: #93c5fd; }
-    .heat-5 { background: #60a5fa; color: #0f172a; }
-    .heat-6 { background: #3b82f6; color: white; }
-    .heat-6 .mini-text, .heat-6 .day-num { color: white; }
-    .heat-6 .badge.study { background: rgba(255,255,255,0.18); color: white; }
-
-    .legend {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.82rem;
-      flex-wrap: wrap;
-    }
-
-    .legend-scale {
-      display: flex;
-      gap: 4px;
-    }
-
-    .legend-box {
-      width: 16px;
-      height: 16px;
-      border-radius: 5px;
-      border: 1px solid rgba(0,0,0,0.04);
-    }
-
-    .chart-wrap {
-      margin-top: 8px;
-    }
-
-    canvas {
-      width: 100%;
-      background: #fff;
-      border-radius: 14px;
-    }
-
-    .hint {
-      font-size: 0.84rem;
-      color: var(--muted);
-      line-height: 1.45;
-      margin-top: 8px;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: var(--muted);
-      padding: 18px 10px;
-      border: 1px dashed var(--line);
-      border-radius: 16px;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    @media (max-width: 680px) {
-      .summary-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 560px) {
-      .row-2, .backup-row { grid-template-columns: 1fr; }
-      .day { min-height: 78px; padding: 6px; }
-      .mini-text { font-size: 0.68rem; }
-      .badge { font-size: 0.66rem; }
-      .summary-card .value { font-size: 1.08rem; }
-    }
+    :root { --bg:#f6f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --primary:#2563eb; --primary-soft:#dbeafe; --danger:#dc2626; --shadow:0 10px 24px rgba(15,23,42,.08); --radius:18px;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    .app{max-width:760px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom))}
+    .hero{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;border-radius:24px;padding:22px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+    .hero h1{margin:0;font-size:1.6rem;font-weight:800}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 18px}
+    .summary-card,.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(229,231,235,.9)}
+    .summary-card{padding:14px}
+    .summary-card .label{color:var(--muted);font-size:.82rem;margin-bottom:6px}
+    .summary-card .value{font-size:1.18rem;font-weight:800;line-height:1.2}
+    .summary-card .sub{margin-top:6px;font-size:.78rem;color:var(--muted)}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+    .tab-btn{border:none;background:#e5e7eb;color:#374151;padding:12px 10px;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer}
+    .tab-btn.active{background:var(--primary);color:#fff}
+    .panel{display:none}.panel.active{display:block}
+    .card{padding:16px;margin-bottom:14px}
+    .card h2{font-size:1.08rem;margin:0 0 14px}
+    .form-grid{display:grid;gap:12px}
+    label{display:block;font-size:.9rem;font-weight:700;margin-bottom:6px}
+    input,textarea{width:100%;max-width:100%;min-width:0;display:block;border:1px solid var(--line);border-radius:14px;padding:12px 13px;font-size:1rem;background:#fff;color:var(--text);appearance:none;-webkit-appearance:none}
+    input[type="date"]{line-height:1.2;min-height:48px}
+    textarea{resize:vertical;min-height:84px}
+    .row-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end}
+    .btn-row,.quick-row{display:flex;gap:10px;flex-wrap:wrap}
+    .quick-btn,button.action,button.secondary,button.danger{border:none;border-radius:14px;padding:12px 16px;font-size:.95rem;font-weight:800;cursor:pointer}
+    button.action{background:var(--primary);color:#fff;flex:1}
+    button.secondary,.quick-btn{background:#eef2ff;color:#3730a3}
+    button.danger{background:#fee2e2;color:var(--danger)}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag-chip{border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-weight:800;font-size:.85rem;background:#fff;cursor:pointer}
+    .tag-chip.active{background:var(--primary);color:#fff;border-color:transparent}
+    .backup-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .records{display:grid;gap:10px;margin-top:8px}
+    .record-item{border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:8px}
+    .record-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .record-date{font-weight:800}
+    .record-hours{font-size:1.1rem;font-weight:800;color:var(--primary);white-space:nowrap}
+    .record-note{color:var(--muted);line-height:1.45;white-space:pre-wrap;font-size:.92rem}
+    .record-tags{display:flex;gap:6px;flex-wrap:wrap}
+    .badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.72rem;font-weight:800;width:fit-content}
+    .badge.tag{background:#e5e7eb;color:#374151}
+    .calendar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+    .calendar-title{font-size:1.05rem;font-weight:800;text-align:center;flex:1}
+    .calendar-grid,.weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .weekday{text-align:center;font-size:.82rem;color:var(--muted);padding:6px 0;font-weight:700}
+    .day{min-height:92px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;position:relative;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+    .day.empty{background:transparent;border-style:dashed;cursor:default}
+    .day.today{outline:2px solid var(--primary);outline-offset:-2px}
+    .day.selected{box-shadow:inset 0 0 0 2px rgba(37,99,235,.18)}
+    .day-num{font-size:.88rem;font-weight:800}
+    .mini-text{font-size:.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .heat-0{background:#fff}.heat-1{background:#eff6ff}.heat-2{background:#dbeafe}.heat-3{background:#bfdbfe}.heat-4{background:#93c5fd}.heat-5{background:#60a5fa;color:#0f172a}.heat-6{background:#3b82f6;color:#fff}
+    .legend{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--muted);font-size:.82rem;flex-wrap:wrap}
+    .legend-scale{display:flex;gap:4px}.legend-box{width:16px;height:16px;border-radius:5px;border:1px solid rgba(0,0,0,.04)}
+    .chart-wrap{margin-top:8px} canvas{width:100%;background:#fff;border-radius:14px}
+    .hint{font-size:.84rem;color:var(--muted);line-height:1.45;margin-top:8px}
+    .empty-state{text-align:center;color:var(--muted);padding:18px 10px;border:1px dashed var(--line);border-radius:16px}
+    .file-input{display:none}
+    @media (max-width:680px){.summary-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:560px){.row-2,.backup-row{grid-template-columns:1fr}.day{min-height:78px;padding:6px}.mini-text{font-size:.68rem}.summary-card .value{font-size:1.08rem}}
   </style>
 </head>
 <body>
   <div class="app">
-    <section class="hero">
-      <h1>공부시간 기록</h1>
-    </section>
+    <section class="hero"><h1>공부시간 기록</h1></section>
 
     <section class="summary-grid">
-      <div class="summary-card">
-        <div class="label">오늘</div>
-        <div class="value" id="todayHours">0시간</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">이번 주</div>
-        <div class="value" id="weekHours">0시간</div>
-        <div class="sub" id="weekCompare">지난주와 비교 0시간</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">이번 달</div>
-        <div class="value" id="monthHours">0시간</div>
-        <div class="sub" id="monthAverage">일평균 0시간</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">연속 기록</div>
-        <div class="value" id="streakDays">0일</div>
-      </div>
+      <div class="summary-card"><div class="label">오늘</div><div class="value" id="todayHours">0시간</div></div>
+      <div class="summary-card"><div class="label">이번 주</div><div class="value" id="weekHours">0시간</div><div class="sub" id="weekCompare">지난주와 비교 0시간</div></div>
+      <div class="summary-card"><div class="label">이번 달</div><div class="value" id="monthHours">0시간</div><div class="sub" id="monthAverage">일평균 0시간</div></div>
+      <div class="summary-card"><div class="label">연속 기록</div><div class="value" id="streakDays">0일</div></div>
     </section>
 
     <div class="tabs">
@@ -457,6 +105,17 @@
               <input id="studyHours" type="number" min="0" max="24" step="0.5" placeholder="예: 6.5" inputmode="decimal" />
             </div>
           </div>
+
+          <div>
+            <label>과목 태그</label>
+            <div class="tags" id="tagContainer">
+              <button type="button" class="tag-chip" data-tag="계약법">계약법</button>
+              <button type="button" class="tag-chip" data-tag="절차론">절차론</button>
+              <button type="button" class="tag-chip" data-tag="실무법">실무법</button>
+              <button type="button" class="tag-chip" data-tag="사무관리">사무관리</button>
+            </div>
+          </div>
+
           <div>
             <label>빠른 입력</label>
             <div class="quick-row">
@@ -467,10 +126,12 @@
               <button class="quick-btn" type="button" id="clearHoursBtn">초기화</button>
             </div>
           </div>
+
           <div>
             <label for="studyNote">메모</label>
             <textarea id="studyNote" placeholder="예: 행정법 3시간, 민법 2시간, 기출 1시간"></textarea>
           </div>
+
           <div class="btn-row">
             <button class="action" id="saveStudyBtn">공부시간 저장</button>
             <button class="secondary" id="loadTodayBtn">오늘로 불러오기</button>
@@ -501,25 +162,13 @@
           <button class="secondary" id="nextMonthBtn">다음</button>
         </div>
         <div class="weekdays">
-          <div class="weekday">일</div>
-          <div class="weekday">월</div>
-          <div class="weekday">화</div>
-          <div class="weekday">수</div>
-          <div class="weekday">목</div>
-          <div class="weekday">금</div>
-          <div class="weekday">토</div>
+          <div class="weekday">일</div><div class="weekday">월</div><div class="weekday">화</div><div class="weekday">수</div><div class="weekday">목</div><div class="weekday">금</div><div class="weekday">토</div>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
         <div class="legend">
           <span>공부시간 적음</span>
           <div class="legend-scale">
-            <span class="legend-box heat-0"></span>
-            <span class="legend-box heat-1"></span>
-            <span class="legend-box heat-2"></span>
-            <span class="legend-box heat-3"></span>
-            <span class="legend-box heat-4"></span>
-            <span class="legend-box heat-5"></span>
-            <span class="legend-box heat-6"></span>
+            <span class="legend-box heat-0"></span><span class="legend-box heat-1"></span><span class="legend-box heat-2"></span><span class="legend-box heat-3"></span><span class="legend-box heat-4"></span><span class="legend-box heat-5"></span><span class="legend-box heat-6"></span>
           </div>
           <span>많음</span>
         </div>
@@ -543,246 +192,215 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'study-time-tracker-v3';
-    const state = {
-      selectedTab: 'input',
-      calendarYear: new Date().getFullYear(),
-      calendarMonth: new Date().getMonth(),
-      selectedDate: formatDate(new Date()),
-      data: loadData()
-    };
+    const STORAGE_KEY = 'study-time-tracker-v4';
+    const TAGS = ['계약법','절차론','실무법','사무관리'];
+    const state = { selectedTab:'input', calendarYear:new Date().getFullYear(), calendarMonth:new Date().getMonth(), selectedDate:formatDate(new Date()), data:loadData() };
 
     const el = {
-      todayHours: document.getElementById('todayHours'),
-      weekHours: document.getElementById('weekHours'),
-      weekCompare: document.getElementById('weekCompare'),
-      monthHours: document.getElementById('monthHours'),
-      monthAverage: document.getElementById('monthAverage'),
-      streakDays: document.getElementById('streakDays'),
-      studyDate: document.getElementById('studyDate'),
-      studyHours: document.getElementById('studyHours'),
-      studyNote: document.getElementById('studyNote'),
-      saveStudyBtn: document.getElementById('saveStudyBtn'),
-      loadTodayBtn: document.getElementById('loadTodayBtn'),
-      clearHoursBtn: document.getElementById('clearHoursBtn'),
-      exportBtn: document.getElementById('exportBtn'),
-      importBtn: document.getElementById('importBtn'),
-      importFile: document.getElementById('importFile'),
-      recentRecords: document.getElementById('recentRecords'),
-      calendarTitle: document.getElementById('calendarTitle'),
-      calendarGrid: document.getElementById('calendarGrid'),
-      prevMonthBtn: document.getElementById('prevMonthBtn'),
-      nextMonthBtn: document.getElementById('nextMonthBtn'),
-      selectedDateTitle: document.getElementById('selectedDateTitle'),
-      selectedDateDetail: document.getElementById('selectedDateDetail'),
-      studyChart: document.getElementById('studyChart')
+      todayHours:document.getElementById('todayHours'),
+      weekHours:document.getElementById('weekHours'),
+      weekCompare:document.getElementById('weekCompare'),
+      monthHours:document.getElementById('monthHours'),
+      monthAverage:document.getElementById('monthAverage'),
+      streakDays:document.getElementById('streakDays'),
+      studyDate:document.getElementById('studyDate'),
+      studyHours:document.getElementById('studyHours'),
+      studyNote:document.getElementById('studyNote'),
+      saveStudyBtn:document.getElementById('saveStudyBtn'),
+      loadTodayBtn:document.getElementById('loadTodayBtn'),
+      clearHoursBtn:document.getElementById('clearHoursBtn'),
+      exportBtn:document.getElementById('exportBtn'),
+      importBtn:document.getElementById('importBtn'),
+      importFile:document.getElementById('importFile'),
+      recentRecords:document.getElementById('recentRecords'),
+      calendarTitle:document.getElementById('calendarTitle'),
+      calendarGrid:document.getElementById('calendarGrid'),
+      prevMonthBtn:document.getElementById('prevMonthBtn'),
+      nextMonthBtn:document.getElementById('nextMonthBtn'),
+      selectedDateTitle:document.getElementById('selectedDateTitle'),
+      selectedDateDetail:document.getElementById('selectedDateDetail'),
+      studyChart:document.getElementById('studyChart'),
+      tagContainer:document.getElementById('tagContainer')
     };
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-    });
+    document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+    document.querySelectorAll('.quick-btn[data-add]').forEach(btn=>btn.addEventListener('click',()=>addHours(parseFloat(btn.dataset.add))));
+    el.clearHoursBtn.addEventListener('click',()=>{el.studyHours.value='';});
+    el.saveStudyBtn.addEventListener('click',saveStudy);
+    el.loadTodayBtn.addEventListener('click',loadToday);
+    el.prevMonthBtn.addEventListener('click',()=>changeMonth(-1));
+    el.nextMonthBtn.addEventListener('click',()=>changeMonth(1));
+    el.exportBtn.addEventListener('click',exportData);
+    el.importBtn.addEventListener('click',()=>el.importFile.click());
+    el.importFile.addEventListener('change',importData);
 
-    document.querySelectorAll('.quick-btn[data-add]').forEach(btn => {
-      btn.addEventListener('click', () => addHours(parseFloat(btn.dataset.add)));
+    // tag toggle
+    el.tagContainer.querySelectorAll('.tag-chip').forEach(btn=>{
+      btn.addEventListener('click',()=>btn.classList.toggle('active'));
     });
-
-    el.saveStudyBtn.addEventListener('click', saveStudy);
-    el.loadTodayBtn.addEventListener('click', loadToday);
-    el.clearHoursBtn.addEventListener('click', () => { el.studyHours.value = ''; });
-    el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-    el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
-    el.exportBtn.addEventListener('click', exportData);
-    el.importBtn.addEventListener('click', () => el.importFile.click());
-    el.importFile.addEventListener('change', importData);
 
     initialize();
     registerServiceWorker();
 
-    function initialize() {
+    function initialize(){
       migrateOldData();
-      const today = formatDate(new Date());
-      el.studyDate.value = today;
+      const today=formatDate(new Date());
+      el.studyDate.value=today;
       renderAll();
     }
 
-    function migrateOldData() {
-      const oldKeys = ['study-time-tracker-v2', 'study-time-tracker-v1'];
-      for (const key of oldKeys) {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.studies && !Object.keys(state.data.studies || {}).length) {
-            state.data = { studies: parsed.studies || {} };
-            saveData();
-            break;
+    function migrateOldData(){
+      const oldKeys=['study-time-tracker-v3','study-time-tracker-v2','study-time-tracker-v1'];
+      for(const key of oldKeys){
+        const raw=localStorage.getItem(key); if(!raw) continue;
+        try{
+          const parsed=JSON.parse(raw);
+          if(parsed && parsed.studies && !Object.keys(state.data.studies||{}).length){
+            // add empty tags to old records
+            const studies={};
+            for(const [d,v] of Object.entries(parsed.studies)){
+              studies[d]={ hours:Number(v.hours||0), note:String(v.note||''), tags:[] };
+            }
+            state.data={studies}; saveData(); break;
           }
-        } catch {}
+        }catch{}
       }
     }
 
-    function loadData() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return sanitizeData(parsed || { studies: {} });
-      } catch {
-        return { studies: {} };
-      }
+    function loadData(){
+      try{
+        const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return sanitizeData(parsed||{studies:{}});
+      }catch{ return {studies:{}}; }
     }
 
-    function sanitizeData(data) {
-      const studies = {};
-      const source = (data && data.studies) || {};
-      for (const [date, item] of Object.entries(source)) {
-        const hours = Number(item && item.hours);
-        const note = String((item && item.note) || '');
-        if (isValidDateKey(date) && !Number.isNaN(hours) && hours >= 0 && hours <= 24) {
-          studies[date] = { hours, note };
+    function sanitizeData(data){
+      const studies={}; const source=(data&&data.studies)||{};
+      for(const [date,item] of Object.entries(source)){
+        const hours=Number(item&&item.hours);
+        const note=String((item&&item.note)||'');
+        const tags=Array.isArray(item&&item.tags)? item.tags.filter(t=>TAGS.includes(t)) : [];
+        if(isValidDateKey(date) && !Number.isNaN(hours) && hours>=0 && hours<=24){
+          studies[date]={hours,note,tags};
         }
       }
-      return { studies };
+      return {studies};
     }
 
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
+
+    function switchTab(tab){
+      state.selectedTab=tab;
+      document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.tab===tab));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id===`panel-${tab}`));
+      if(tab==='chart') drawChart();
+      if(tab==='calendar') renderCalendar();
     }
 
-    function switchTab(tab) {
-      state.selectedTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
+    function getSelectedTags(){
+      return Array.from(el.tagContainer.querySelectorAll('.tag-chip.active')).map(b=>b.dataset.tag);
+    }
+
+    function setSelectedTags(tags){
+      el.tagContainer.querySelectorAll('.tag-chip').forEach(b=>{
+        b.classList.toggle('active', tags.includes(b.dataset.tag));
       });
-      document.querySelectorAll('.panel').forEach(panel => {
-        panel.classList.toggle('active', panel.id === `panel-${tab}`);
-      });
-      if (tab === 'chart') drawChart();
-      if (tab === 'calendar') renderCalendar();
     }
 
-    function addHours(amount) {
-      const current = parseFloat(el.studyHours.value || '0');
-      const next = Math.min(24, current + amount);
-      el.studyHours.value = trimZero(next);
+    function addHours(amount){
+      const current=parseFloat(el.studyHours.value||'0');
+      const next=Math.min(24, current+amount);
+      el.studyHours.value=trimZero(next);
     }
 
-    function saveStudy() {
-      const date = el.studyDate.value;
-      const hours = parseFloat(el.studyHours.value);
-      const note = el.studyNote.value.trim();
+    function saveStudy(){
+      const date=el.studyDate.value;
+      const hours=parseFloat(el.studyHours.value);
+      const note=el.studyNote.value.trim();
+      const tags=getSelectedTags();
 
-      if (!date) return alert('날짜를 선택해 주세요.');
-      if (Number.isNaN(hours) || hours < 0 || hours > 24) return alert('공부시간을 0~24 사이로 입력해 주세요.');
+      if(!date) return alert('날짜를 선택해 주세요.');
+      if(Number.isNaN(hours)||hours<0||hours>24) return alert('공부시간을 0~24 사이로 입력해 주세요.');
 
-      state.data.studies[date] = { hours, note };
+      state.data.studies[date]={hours,note,tags};
       saveData();
-      state.selectedDate = date;
+      state.selectedDate=date;
       renderAll();
       alert('공부시간이 저장되었습니다.');
     }
 
-    function loadToday() {
-      const today = formatDate(new Date());
-      el.studyDate.value = today;
-      const record = state.data.studies[today];
-      el.studyHours.value = record ? trimZero(record.hours) : '';
-      el.studyNote.value = record ? record.note : '';
+    function loadToday(){
+      const today=formatDate(new Date());
+      el.studyDate.value=today;
+      const record=state.data.studies[today];
+      el.studyHours.value=record? trimZero(record.hours):'';
+      el.studyNote.value=record? record.note:'';
+      setSelectedTags(record && record.tags ? record.tags : []);
     }
 
-    function exportData() {
-      const payload = {
-        app: '공부시간 기록',
-        version: 3,
-        exportedAt: new Date().toISOString(),
-        data: state.data
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const today = formatDate(new Date());
-      a.href = url;
-      a.download = `study-time-backup-${today}.json`;
-      a.click();
+    function exportData(){
+      const payload={app:'공부시간 기록',version:4,exportedAt:new Date().toISOString(),data:state.data};
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=`study-time-backup-${formatDate(new Date())}.json`; a.click();
       URL.revokeObjectURL(url);
     }
 
-    async function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        const imported = sanitizeData(parsed.data || parsed);
-        if (!Object.keys(imported.studies).length && !confirm('복원할 기록이 없거나 형식이 다릅니다. 그래도 계속할까요?')) {
-          event.target.value = '';
-          return;
-        }
-        if (!confirm('현재 기록을 백업 파일 내용으로 교체할까요?')) {
-          event.target.value = '';
-          return;
-        }
-        state.data = imported;
-        saveData();
-        renderAll();
-        alert('백업 복원이 완료되었습니다.');
-      } catch {
-        alert('백업 파일을 읽지 못했습니다.');
-      }
-      event.target.value = '';
+    async function importData(e){
+      const file=e.target.files[0]; if(!file) return;
+      try{
+        const text=await file.text();
+        const parsed=JSON.parse(text);
+        const imported=sanitizeData(parsed.data||parsed);
+        if(!Object.keys(imported.studies).length && !confirm('복원할 기록이 없거나 형식이 다릅니다. 계속할까요?')){ e.target.value=''; return; }
+        if(!confirm('현재 기록을 백업 파일로 교체할까요?')){ e.target.value=''; return; }
+        state.data=imported; saveData(); renderAll(); alert('복원 완료');
+      }catch{ alert('파일을 읽지 못했습니다.'); }
+      e.target.value='';
     }
 
-    function renderAll() {
-      renderSummary();
-      renderRecentRecords();
-      renderCalendar();
-      renderSelectedDate();
-      drawChart();
+    function renderAll(){
+      renderSummary(); renderRecentRecords(); renderCalendar(); renderSelectedDate(); drawChart();
     }
 
-    function renderSummary() {
-      const today = formatDate(new Date());
-      const todayRecord = state.data.studies[today];
-      const now = new Date();
+    function renderSummary(){
+      const today=formatDate(new Date());
+      const todayRecord=state.data.studies[today];
+      const now=new Date();
 
-      const thisWeek = getWeekRange(now);
-      const prevWeekRef = new Date(thisWeek.start);
-      prevWeekRef.setDate(prevWeekRef.getDate() - 1);
-      const lastWeek = getWeekRange(prevWeekRef);
+      const thisWeek=getWeekRange(now);
+      const prevWeekRef=new Date(thisWeek.start); prevWeekRef.setDate(prevWeekRef.getDate()-1);
+      const lastWeek=getWeekRange(prevWeekRef);
 
-      const thisWeekTotal = sumRange(thisWeek.start, thisWeek.end);
-      const lastWeekTotal = sumRange(lastWeek.start, lastWeek.end);
-      const weekDiff = thisWeekTotal - lastWeekTotal;
+      const thisWeekTotal=sumRange(thisWeek.start,thisWeek.end);
+      const lastWeekTotal=sumRange(lastWeek.start,lastWeek.end);
+      const weekDiff=thisWeekTotal-lastWeekTotal;
 
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const monthTotal = sumRange(monthStart, monthEnd);
-      const todayDate = now.getDate();
-      const monthAverage = todayDate > 0 ? (monthTotal / todayDate) : 0;
+      const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+      const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+      const monthTotal=sumRange(monthStart,monthEnd);
+      const monthAverage=(now.getDate()>0)? (monthTotal/now.getDate()):0;
 
-      el.todayHours.textContent = `${todayRecord ? trimZero(todayRecord.hours) : 0}시간`;
-      el.weekHours.textContent = `${trimZero(thisWeekTotal)}시간`;
-      el.weekCompare.textContent = `지난주와 비교 ${weekDiff >= 0 ? '+' : ''}${trimZero(weekDiff)}시간`;
-      el.monthHours.textContent = `${trimZero(monthTotal)}시간`;
-      el.monthAverage.textContent = `일평균 ${trimZero(monthAverage)}시간`;
-      el.streakDays.textContent = `${calcStreak()}일`;
+      el.todayHours.textContent=`${todayRecord?trimZero(todayRecord.hours):0}시간`;
+      el.weekHours.textContent=`${trimZero(thisWeekTotal)}시간`;
+      el.weekCompare.textContent=`지난주와 비교 ${weekDiff>=0?'+':''}${trimZero(weekDiff)}시간`;
+      el.monthHours.textContent=`${trimZero(monthTotal)}시간`;
+      el.monthAverage.textContent=`일평균 ${trimZero(monthAverage)}시간`;
+      el.streakDays.textContent=`${calcStreak()}일`;
     }
 
-    function renderRecentRecords() {
-      const entries = Object.entries(state.data.studies)
-        .sort((a, b) => b[0].localeCompare(a[0]))
-        .slice(0, 10);
-
-      if (!entries.length) {
-        el.recentRecords.innerHTML = '<div class="empty-state">아직 저장된 공부기록이 없습니다.</div>';
-        return;
-      }
-
-      el.recentRecords.innerHTML = entries.map(([date, item]) => `
+    function renderRecentRecords(){
+      const entries=Object.entries(state.data.studies).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+      if(!entries.length){ el.recentRecords.innerHTML='<div class="empty-state">아직 저장된 공부기록이 없습니다.</div>'; return; }
+      el.recentRecords.innerHTML=entries.map(([date,item])=>`
         <div class="record-item">
           <div class="record-top">
             <div class="record-date">${date}</div>
             <div class="record-hours">${trimZero(item.hours)}시간</div>
           </div>
-          <div class="record-note">${escapeHtml(item.note || '메모 없음')}</div>
+          ${item.tags && item.tags.length ? `<div class="record-tags">${item.tags.map(t=>`<span class="badge tag">${t}</span>`).join('')}</div>`:''}
+          <div class="record-note">${escapeHtml(item.note||'메모 없음')}</div>
           <div class="btn-row">
             <button class="secondary" onclick="editStudy('${date}')">불러오기</button>
             <button class="danger" onclick="deleteStudy('${date}')">삭제</button>
@@ -791,267 +409,129 @@
       `).join('');
     }
 
-    function renderCalendar() {
-      const year = state.calendarYear;
-      const month = state.calendarMonth;
-      const firstDay = new Date(year, month, 1);
-      const startWeekday = firstDay.getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const today = formatDate(new Date());
+    function renderCalendar(){
+      const year=state.calendarYear; const month=state.calendarMonth;
+      const firstDay=new Date(year,month,1); const startWeekday=firstDay.getDay();
+      const daysInMonth=new Date(year,month+1,0).getDate();
+      const today=formatDate(new Date());
 
-      const monthEntries = [];
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const study = state.data.studies[date];
-        monthEntries.push(study ? Number(study.hours || 0) : 0);
+      const monthEntries=[];
+      for(let d=1; d<=daysInMonth; d++){
+        const date=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const study=state.data.studies[date];
+        monthEntries.push(study?Number(study.hours||0):0);
       }
-      const maxMonthHours = Math.max(0, ...monthEntries);
+      const maxMonthHours=Math.max(0,...monthEntries);
 
-      el.calendarTitle.textContent = `${year}년 ${month + 1}월`;
-      const cells = [];
-
-      for (let i = 0; i < startWeekday; i++) {
-        cells.push('<div class="day empty"></div>');
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const study = state.data.studies[date];
-        const hours = study ? Number(study.hours || 0) : 0;
-        const classes = ['day', `heat-${getHeatLevel(hours, maxMonthHours)}`];
-        if (date === today) classes.push('today');
-        if (date === state.selectedDate) classes.push('selected');
-
+      el.calendarTitle.textContent=`${year}년 ${month+1}월`;
+      const cells=[];
+      for(let i=0;i<startWeekday;i++) cells.push('<div class="day empty"></div>');
+      for(let d=1; d<=daysInMonth; d++){
+        const date=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const study=state.data.studies[date];
+        const hours=study?Number(study.hours||0):0;
+        const classes=['day', `heat-${getHeatLevel(hours,maxMonthHours)}`];
+        if(date===today) classes.push('today');
+        if(date===state.selectedDate) classes.push('selected');
         cells.push(`
           <div class="${classes.join(' ')}" onclick="selectDate('${date}')">
-            <div class="day-num">${day}</div>
-            ${study ? `<span class="badge study">${trimZero(study.hours)}h</span>` : ''}
-            ${study && study.note ? `<div class="mini-text">${escapeHtml(study.note)}</div>` : ''}
+            <div class="day-num">${d}</div>
+            ${study?`<span class="badge">${trimZero(study.hours)}h</span>`:''}
+            ${study && study.tags && study.tags.length?`<div class="mini-text">${study.tags.join(', ')}</div>`:''}
           </div>
         `);
       }
-
-      el.calendarGrid.innerHTML = cells.join('');
+      el.calendarGrid.innerHTML=cells.join('');
     }
 
-    function getHeatLevel(hours, maxMonthHours) {
-      if (!hours || maxMonthHours <= 0) return 0;
-      const ratio = hours / maxMonthHours;
-      if (ratio <= 0.2) return 1;
-      if (ratio <= 0.35) return 2;
-      if (ratio <= 0.5) return 3;
-      if (ratio <= 0.7) return 4;
-      if (ratio <= 0.85) return 5;
-      return 6;
+    function getHeatLevel(hours,max){
+      if(!hours||max<=0) return 0;
+      const r=hours/max;
+      if(r<=.2) return 1; if(r<=.35) return 2; if(r<=.5) return 3; if(r<=.7) return 4; if(r<=.85) return 5; return 6;
     }
 
-    function renderSelectedDate() {
-      const date = state.selectedDate;
-      const study = state.data.studies[date];
-      el.selectedDateTitle.textContent = `${date} 상세`;
-
-      let html = '';
-      if (study) {
-        html += `
+    function renderSelectedDate(){
+      const date=state.selectedDate; const study=state.data.studies[date];
+      el.selectedDateTitle.textContent=`${date} 상세`;
+      let html='';
+      if(study){
+        html+=`
           <div class="record-item">
             <div class="record-top">
               <div class="record-date">공부기록</div>
               <div class="record-hours">${trimZero(study.hours)}시간</div>
             </div>
-            <div class="record-note">${escapeHtml(study.note || '메모 없음')}</div>
+            ${study.tags && study.tags.length ? `<div class="record-tags">${study.tags.map(t=>`<span class="badge tag">${t}</span>`).join('')}</div>`:''}
+            <div class="record-note">${escapeHtml(study.note||'메모 없음')}</div>
           </div>
         `;
       }
-
-      el.selectedDateDetail.innerHTML = html || '<div class="empty-state">선택한 날짜에 저장된 내용이 없습니다.</div>';
+      el.selectedDateDetail.innerHTML=html||'<div class="empty-state">선택한 날짜에 저장된 내용이 없습니다.</div>';
     }
 
-    function changeMonth(offset) {
-      state.calendarMonth += offset;
-      if (state.calendarMonth < 0) {
-        state.calendarMonth = 11;
-        state.calendarYear -= 1;
-      }
-      if (state.calendarMonth > 11) {
-        state.calendarMonth = 0;
-        state.calendarYear += 1;
-      }
+    function changeMonth(offset){
+      state.calendarMonth+=offset;
+      if(state.calendarMonth<0){state.calendarMonth=11; state.calendarYear--;}
+      if(state.calendarMonth>11){state.calendarMonth=0; state.calendarYear++;}
       renderCalendar();
     }
 
-    function drawChart() {
-      const canvas = el.studyChart;
-      const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-      ctx.clearRect(0, 0, width, height);
-
-      const days = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const key = formatDate(d);
-        days.push({
-          date: key,
-          label: `${d.getMonth() + 1}/${d.getDate()}`,
-          value: Number((state.data.studies[key] || {}).hours || 0)
-        });
+    function drawChart(){
+      const canvas=el.studyChart; const ctx=canvas.getContext('2d');
+      const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h);
+      const days=[];
+      for(let i=29;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i);
+        const key=formatDate(d);
+        days.push({label:`${d.getMonth()+1}/${d.getDate()}`, value:Number((state.data.studies[key]||{}).hours||0)});
       }
-
-      const max = Math.max(8, ...days.map(d => d.value));
-      const left = 36;
-      const right = 12;
-      const top = 18;
-      const bottom = 34;
-      const chartW = width - left - right;
-      const chartH = height - top - bottom;
-      const barW = chartW / days.length - 6;
-
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(left, top);
-      ctx.lineTo(left, height - bottom);
-      ctx.lineTo(width - right, height - bottom);
-      ctx.stroke();
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = '12px sans-serif';
-      for (let i = 0; i <= 4; i++) {
-        const value = (max / 4) * i;
-        const y = height - bottom - (chartH * i / 4);
-        ctx.fillText(trimZero(value), 6, y + 4);
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.beginPath();
-        ctx.moveTo(left, y);
-        ctx.lineTo(width - right, y);
-        ctx.stroke();
+      const max=Math.max(8,...days.map(d=>d.value));
+      const left=36,right=12,top=18,bottom=34, chartW=w-left-right, chartH=h-top-bottom, barW=chartW/days.length-6;
+      ctx.strokeStyle='#cbd5e1'; ctx.beginPath(); ctx.moveTo(left,top); ctx.lineTo(left,h-bottom); ctx.lineTo(w-right,h-bottom); ctx.stroke();
+      ctx.fillStyle='#64748b'; ctx.font='12px sans-serif';
+      for(let i=0;i<=4;i++){ const v=(max/4)*i; const y=h-bottom-(chartH*i/4); ctx.fillText(trimZero(v),6,y+4);
+        ctx.strokeStyle='#e5e7eb'; ctx.beginPath(); ctx.moveTo(left,y); ctx.lineTo(w-right,y); ctx.stroke();
       }
-
-      days.forEach((d, idx) => {
-        const x = left + idx * (barW + 6) + 3;
-        const h = d.value === 0 ? 2 : (d.value / max) * chartH;
-        const y = height - bottom - h;
-        ctx.fillStyle = '#3b82f6';
-        ctx.beginPath();
-        roundRect(ctx, x, y, barW, h, 6);
-        ctx.fill();
-
-        if (idx % 5 === 0 || idx === days.length - 1) {
-          ctx.fillStyle = '#64748b';
-          ctx.font = '11px sans-serif';
-          ctx.save();
-          ctx.translate(x + barW / 2, height - 10);
-          ctx.rotate(-0.45);
-          ctx.fillText(d.label, 0, 0);
-          ctx.restore();
-        }
+      days.forEach((d,idx)=>{
+        const x=left+idx*(barW+6)+3; const bh=d.value===0?2:(d.value/max)*chartH; const y=h-bottom-bh;
+        ctx.fillStyle='#3b82f6'; ctx.beginPath(); roundRect(ctx,x,y,barW,bh,6); ctx.fill();
+        if(idx%5===0||idx===days.length-1){ ctx.fillStyle='#64748b'; ctx.font='11px sans-serif'; ctx.save(); ctx.translate(x+barW/2,h-10); ctx.rotate(-0.45); ctx.fillText(d.label,0,0); ctx.restore(); }
       });
     }
 
-    function roundRect(ctx, x, y, width, height, radius) {
-      const r = Math.min(radius, width / 2, height / 2);
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + width, y, x + width, y + height, r);
-      ctx.arcTo(x + width, y + height, x, y + height, r);
-      ctx.arcTo(x, y + height, x, y, r);
-      ctx.arcTo(x, y, x + width, y, r);
-      ctx.closePath();
+    function roundRect(ctx,x,y,w,h,r){ const rr=Math.min(r,w/2,h/2); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); }
+
+    function calcStreak(){
+      let s=0; const d=new Date();
+      while(true){ const key=formatDate(d); const rec=state.data.studies[key];
+        if(rec && Number(rec.hours)>0){ s++; d.setDate(d.getDate()-1);} else break;
+      } return s;
     }
 
-    function calcStreak() {
-      let streak = 0;
-      const d = new Date();
-      while (true) {
-        const key = formatDate(d);
-        const record = state.data.studies[key];
-        if (record && Number(record.hours) > 0) {
-          streak += 1;
-          d.setDate(d.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-      return streak;
+    function getWeekRange(date){
+      const t=new Date(date); const day=t.getDay(); const start=new Date(t); start.setHours(0,0,0,0); start.setDate(t.getDate()-day);
+      const end=new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999); return {start,end};
     }
 
-    function getWeekRange(date) {
-      const target = new Date(date);
-      const day = target.getDay();
-      const start = new Date(target);
-      start.setHours(0, 0, 0, 0);
-      start.setDate(target.getDate() - day);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      end.setHours(23, 59, 59, 999);
-      return { start, end };
+    function sumRange(s,e){
+      const start=formatDate(s), end=formatDate(e);
+      return Object.entries(state.data.studies).filter(([d])=>d>=start&&d<=end).reduce((sum,[,v])=>sum+Number(v.hours||0),0);
     }
 
-    function sumRange(startDate, endDate) {
-      const start = formatDate(startDate);
-      const end = formatDate(endDate);
-      return Object.entries(state.data.studies)
-        .filter(([date]) => date >= start && date <= end)
-        .reduce((sum, [, v]) => sum + Number(v.hours || 0), 0);
-    }
+    function trimZero(v){ const n=Number(v||0); return Number.isInteger(n)?String(n):n.toFixed(1).replace(/\.0$/,''); }
+    function formatDate(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; }
+    function isValidDateKey(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+    function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;"); }
 
-    function trimZero(value) {
-      const num = Number(value || 0);
-      return Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '');
-    }
+    function registerServiceWorker(){ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); } }
 
-    function formatDate(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+    window.selectDate=function(date){ state.selectedDate=date; const sel=new Date(date); state.calendarYear=sel.getFullYear(); state.calendarMonth=sel.getMonth(); renderCalendar(); renderSelectedDate(); }
+    window.editStudy=function(date){
+      const item=state.data.studies[date]; if(!item) return;
+      switchTab('input'); el.studyDate.value=date; el.studyHours.value=trimZero(item.hours); el.studyNote.value=item.note||'';
+      setSelectedTags(item.tags||[]);
+      state.selectedDate=date; window.scrollTo({top:0,behavior:'smooth'});
     }
-
-    function isValidDateKey(dateStr) {
-      return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-      }
-    }
-
-    window.selectDate = function(date) {
-      state.selectedDate = date;
-      const selected = new Date(date);
-      state.calendarYear = selected.getFullYear();
-      state.calendarMonth = selected.getMonth();
-      renderCalendar();
-      renderSelectedDate();
-    }
-
-    window.editStudy = function(date) {
-      const item = state.data.studies[date];
-      if (!item) return;
-      switchTab('input');
-      el.studyDate.value = date;
-      el.studyHours.value = trimZero(item.hours);
-      el.studyNote.value = item.note || '';
-      state.selectedDate = date;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    window.deleteStudy = function(date) {
-      if (!confirm(`${date} 공부기록을 삭제할까요?`)) return;
-      delete state.data.studies[date];
-      saveData();
-      renderAll();
-    }
+    window.deleteStudy=function(date){ if(!confirm(`${date} 공부기록을 삭제할까요?`)) return; delete state.data.studies[date]; saveData(); renderAll(); }
   </script>
 </body>
 </html>
