@@ -2,7 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="공부시간 기록" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-180.png" />
   <title>공부시간 기록</title>
   <style>
     :root {
@@ -14,11 +20,12 @@
       --primary: #2563eb;
       --primary-soft: #dbeafe;
       --danger: #dc2626;
+      --success: #16a34a;
       --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       margin: 0;
@@ -30,7 +37,7 @@
     .app {
       max-width: 760px;
       margin: 0 auto;
-      padding: 18px 16px 28px;
+      padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
     }
 
     .hero {
@@ -50,7 +57,7 @@
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin: 14px 0 18px;
     }
@@ -74,8 +81,15 @@
     }
 
     .summary-card .value {
-      font-size: 1.28rem;
+      font-size: 1.18rem;
       font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .summary-card .sub {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
     }
 
     .tabs {
@@ -125,12 +139,22 @@
 
     input, textarea {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      display: block;
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 12px 13px;
       font-size: 1rem;
       background: #fff;
       color: var(--text);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="date"] {
+      line-height: 1.2;
+      min-height: 48px;
     }
 
     textarea {
@@ -140,16 +164,18 @@
 
     .row-2 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 10px;
+      align-items: end;
     }
 
-    .btn-row {
+    .btn-row, .quick-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
 
+    .quick-btn,
     button.action,
     button.secondary,
     button.danger {
@@ -167,7 +193,7 @@
       flex: 1;
     }
 
-    button.secondary {
+    button.secondary, .quick-btn {
       background: #eef2ff;
       color: #3730a3;
     }
@@ -175,6 +201,12 @@
     button.danger {
       background: #fee2e2;
       color: var(--danger);
+    }
+
+    .backup-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
     .records {
@@ -206,6 +238,7 @@
       font-size: 1.1rem;
       font-weight: 800;
       color: var(--primary);
+      white-space: nowrap;
     }
 
     .record-note {
@@ -220,11 +253,14 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      gap: 8px;
     }
 
     .calendar-title {
       font-size: 1.05rem;
       font-weight: 800;
+      text-align: center;
+      flex: 1;
     }
 
     .calendar-grid,
@@ -243,7 +279,7 @@
     }
 
     .day {
-      min-height: 86px;
+      min-height: 92px;
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -253,7 +289,10 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      transition: transform .12s ease;
     }
+
+    .day:active { transform: scale(0.98); }
 
     .day.empty {
       background: transparent;
@@ -267,7 +306,7 @@
     }
 
     .day.selected {
-      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 2px rgba(37, 99, 235, .18);
     }
 
     .day-num {
@@ -285,7 +324,7 @@
     }
 
     .badge.study {
-      background: #dbeafe;
+      background: rgba(255,255,255,0.88);
       color: #1d4ed8;
     }
 
@@ -295,6 +334,38 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .heat-0 { background: #ffffff; }
+    .heat-1 { background: #eff6ff; }
+    .heat-2 { background: #dbeafe; }
+    .heat-3 { background: #bfdbfe; }
+    .heat-4 { background: #93c5fd; }
+    .heat-5 { background: #60a5fa; color: #0f172a; }
+    .heat-6 { background: #3b82f6; color: white; }
+    .heat-6 .mini-text, .heat-6 .day-num { color: white; }
+    .heat-6 .badge.study { background: rgba(255,255,255,0.18); color: white; }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-scale {
+      display: flex;
+      gap: 4px;
+    }
+
+    .legend-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      border: 1px solid rgba(0,0,0,0.04);
     }
 
     .chart-wrap {
@@ -322,12 +393,20 @@
       border-radius: 16px;
     }
 
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 680px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     @media (max-width: 560px) {
-      .summary-grid { grid-template-columns: 1fr 1fr 1fr; }
-      .row-2 { grid-template-columns: 1fr; }
-      .day { min-height: 74px; padding: 6px; }
+      .row-2, .backup-row { grid-template-columns: 1fr; }
+      .day { min-height: 78px; padding: 6px; }
       .mini-text { font-size: 0.68rem; }
       .badge { font-size: 0.66rem; }
+      .summary-card .value { font-size: 1.08rem; }
     }
   </style>
 </head>
@@ -343,8 +422,14 @@
         <div class="value" id="todayHours">0시간</div>
       </div>
       <div class="summary-card">
+        <div class="label">이번 주</div>
+        <div class="value" id="weekHours">0시간</div>
+        <div class="sub" id="weekCompare">지난주와 비교 0시간</div>
+      </div>
+      <div class="summary-card">
         <div class="label">이번 달</div>
         <div class="value" id="monthHours">0시간</div>
+        <div class="sub" id="monthAverage">일평균 0시간</div>
       </div>
       <div class="summary-card">
         <div class="label">연속 기록</div>
@@ -369,7 +454,17 @@
             </div>
             <div>
               <label for="studyHours">공부시간</label>
-              <input id="studyHours" type="number" min="0" max="24" step="0.5" placeholder="예: 6.5" />
+              <input id="studyHours" type="number" min="0" max="24" step="0.5" placeholder="예: 6.5" inputmode="decimal" />
+            </div>
+          </div>
+          <div>
+            <label>빠른 입력</label>
+            <div class="quick-row">
+              <button class="quick-btn" type="button" data-add="1">+1시간</button>
+              <button class="quick-btn" type="button" data-add="2">+2시간</button>
+              <button class="quick-btn" type="button" data-add="3">+3시간</button>
+              <button class="quick-btn" type="button" data-add="0.5">+0.5시간</button>
+              <button class="quick-btn" type="button" id="clearHoursBtn">초기화</button>
             </div>
           </div>
           <div>
@@ -381,6 +476,15 @@
             <button class="secondary" id="loadTodayBtn">오늘로 불러오기</button>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>백업 / 복원</h2>
+        <div class="backup-row">
+          <button class="secondary" id="exportBtn">백업 내보내기</button>
+          <button class="secondary" id="importBtn">백업 불러오기</button>
+        </div>
+        <input class="file-input" id="importFile" type="file" accept="application/json" />
       </div>
 
       <div class="card">
@@ -406,6 +510,19 @@
           <div class="weekday">토</div>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="legend">
+          <span>공부시간 적음</span>
+          <div class="legend-scale">
+            <span class="legend-box heat-0"></span>
+            <span class="legend-box heat-1"></span>
+            <span class="legend-box heat-2"></span>
+            <span class="legend-box heat-3"></span>
+            <span class="legend-box heat-4"></span>
+            <span class="legend-box heat-5"></span>
+            <span class="legend-box heat-6"></span>
+          </div>
+          <span>많음</span>
+        </div>
       </div>
 
       <div class="card">
@@ -420,13 +537,13 @@
         <div class="chart-wrap">
           <canvas id="studyChart" width="700" height="320"></canvas>
         </div>
-        <div class="hint">막대 높이로 날짜별 공부시간을 확인할 수 있습니다.</div>
+        <div class="hint">최근 30일을 기준으로 날짜별 공부시간을 표시합니다.</div>
       </div>
     </section>
   </div>
 
   <script>
-    const STORAGE_KEY = 'study-time-tracker-v2';
+    const STORAGE_KEY = 'study-time-tracker-v3';
     const state = {
       selectedTab: 'input',
       calendarYear: new Date().getFullYear(),
@@ -437,13 +554,20 @@
 
     const el = {
       todayHours: document.getElementById('todayHours'),
+      weekHours: document.getElementById('weekHours'),
+      weekCompare: document.getElementById('weekCompare'),
       monthHours: document.getElementById('monthHours'),
+      monthAverage: document.getElementById('monthAverage'),
       streakDays: document.getElementById('streakDays'),
       studyDate: document.getElementById('studyDate'),
       studyHours: document.getElementById('studyHours'),
       studyNote: document.getElementById('studyNote'),
       saveStudyBtn: document.getElementById('saveStudyBtn'),
       loadTodayBtn: document.getElementById('loadTodayBtn'),
+      clearHoursBtn: document.getElementById('clearHoursBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      importBtn: document.getElementById('importBtn'),
+      importFile: document.getElementById('importFile'),
       recentRecords: document.getElementById('recentRecords'),
       calendarTitle: document.getElementById('calendarTitle'),
       calendarGrid: document.getElementById('calendarGrid'),
@@ -458,25 +582,65 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
+    document.querySelectorAll('.quick-btn[data-add]').forEach(btn => {
+      btn.addEventListener('click', () => addHours(parseFloat(btn.dataset.add)));
+    });
+
     el.saveStudyBtn.addEventListener('click', saveStudy);
     el.loadTodayBtn.addEventListener('click', loadToday);
+    el.clearHoursBtn.addEventListener('click', () => { el.studyHours.value = ''; });
     el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
+    el.exportBtn.addEventListener('click', exportData);
+    el.importBtn.addEventListener('click', () => el.importFile.click());
+    el.importFile.addEventListener('change', importData);
 
     initialize();
+    registerServiceWorker();
 
     function initialize() {
+      migrateOldData();
       const today = formatDate(new Date());
       el.studyDate.value = today;
       renderAll();
     }
 
+    function migrateOldData() {
+      const oldKeys = ['study-time-tracker-v2', 'study-time-tracker-v1'];
+      for (const key of oldKeys) {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.studies && !Object.keys(state.data.studies || {}).length) {
+            state.data = { studies: parsed.studies || {} };
+            saveData();
+            break;
+          }
+        } catch {}
+      }
+    }
+
     function loadData() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { studies: {} };
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return sanitizeData(parsed || { studies: {} });
       } catch {
         return { studies: {} };
       }
+    }
+
+    function sanitizeData(data) {
+      const studies = {};
+      const source = (data && data.studies) || {};
+      for (const [date, item] of Object.entries(source)) {
+        const hours = Number(item && item.hours);
+        const note = String((item && item.note) || '');
+        if (isValidDateKey(date) && !Number.isNaN(hours) && hours >= 0 && hours <= 24) {
+          studies[date] = { hours, note };
+        }
+      }
+      return { studies };
     }
 
     function saveData() {
@@ -493,6 +657,12 @@
       });
       if (tab === 'chart') drawChart();
       if (tab === 'calendar') renderCalendar();
+    }
+
+    function addHours(amount) {
+      const current = parseFloat(el.studyHours.value || '0');
+      const next = Math.min(24, current + amount);
+      el.studyHours.value = trimZero(next);
     }
 
     function saveStudy() {
@@ -514,8 +684,50 @@
       const today = formatDate(new Date());
       el.studyDate.value = today;
       const record = state.data.studies[today];
-      el.studyHours.value = record ? record.hours : '';
+      el.studyHours.value = record ? trimZero(record.hours) : '';
       el.studyNote.value = record ? record.note : '';
+    }
+
+    function exportData() {
+      const payload = {
+        app: '공부시간 기록',
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        data: state.data
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = formatDate(new Date());
+      a.href = url;
+      a.download = `study-time-backup-${today}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const imported = sanitizeData(parsed.data || parsed);
+        if (!Object.keys(imported.studies).length && !confirm('복원할 기록이 없거나 형식이 다릅니다. 그래도 계속할까요?')) {
+          event.target.value = '';
+          return;
+        }
+        if (!confirm('현재 기록을 백업 파일 내용으로 교체할까요?')) {
+          event.target.value = '';
+          return;
+        }
+        state.data = imported;
+        saveData();
+        renderAll();
+        alert('백업 복원이 완료되었습니다.');
+      } catch {
+        alert('백업 파일을 읽지 못했습니다.');
+      }
+      event.target.value = '';
     }
 
     function renderAll() {
@@ -528,16 +740,29 @@
 
     function renderSummary() {
       const today = formatDate(new Date());
-      const now = new Date();
-      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const todayRecord = state.data.studies[today];
+      const now = new Date();
 
-      const monthTotal = Object.entries(state.data.studies)
-        .filter(([date]) => date.startsWith(monthKey))
-        .reduce((sum, [, v]) => sum + Number(v.hours || 0), 0);
+      const thisWeek = getWeekRange(now);
+      const prevWeekRef = new Date(thisWeek.start);
+      prevWeekRef.setDate(prevWeekRef.getDate() - 1);
+      const lastWeek = getWeekRange(prevWeekRef);
+
+      const thisWeekTotal = sumRange(thisWeek.start, thisWeek.end);
+      const lastWeekTotal = sumRange(lastWeek.start, lastWeek.end);
+      const weekDiff = thisWeekTotal - lastWeekTotal;
+
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const monthTotal = sumRange(monthStart, monthEnd);
+      const todayDate = now.getDate();
+      const monthAverage = todayDate > 0 ? (monthTotal / todayDate) : 0;
 
       el.todayHours.textContent = `${todayRecord ? trimZero(todayRecord.hours) : 0}시간`;
+      el.weekHours.textContent = `${trimZero(thisWeekTotal)}시간`;
+      el.weekCompare.textContent = `지난주와 비교 ${weekDiff >= 0 ? '+' : ''}${trimZero(weekDiff)}시간`;
       el.monthHours.textContent = `${trimZero(monthTotal)}시간`;
+      el.monthAverage.textContent = `일평균 ${trimZero(monthAverage)}시간`;
       el.streakDays.textContent = `${calcStreak()}일`;
     }
 
@@ -574,6 +799,14 @@
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const today = formatDate(new Date());
 
+      const monthEntries = [];
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const study = state.data.studies[date];
+        monthEntries.push(study ? Number(study.hours || 0) : 0);
+      }
+      const maxMonthHours = Math.max(0, ...monthEntries);
+
       el.calendarTitle.textContent = `${year}년 ${month + 1}월`;
       const cells = [];
 
@@ -584,7 +817,8 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const study = state.data.studies[date];
-        const classes = ['day'];
+        const hours = study ? Number(study.hours || 0) : 0;
+        const classes = ['day', `heat-${getHeatLevel(hours, maxMonthHours)}`];
         if (date === today) classes.push('today');
         if (date === state.selectedDate) classes.push('selected');
 
@@ -598,6 +832,17 @@
       }
 
       el.calendarGrid.innerHTML = cells.join('');
+    }
+
+    function getHeatLevel(hours, maxMonthHours) {
+      if (!hours || maxMonthHours <= 0) return 0;
+      const ratio = hours / maxMonthHours;
+      if (ratio <= 0.2) return 1;
+      if (ratio <= 0.35) return 2;
+      if (ratio <= 0.5) return 3;
+      if (ratio <= 0.7) return 4;
+      if (ratio <= 0.85) return 5;
+      return 6;
     }
 
     function renderSelectedDate() {
@@ -730,6 +975,26 @@
       return streak;
     }
 
+    function getWeekRange(date) {
+      const target = new Date(date);
+      const day = target.getDay();
+      const start = new Date(target);
+      start.setHours(0, 0, 0, 0);
+      start.setDate(target.getDate() - day);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+
+    function sumRange(startDate, endDate) {
+      const start = formatDate(startDate);
+      const end = formatDate(endDate);
+      return Object.entries(state.data.studies)
+        .filter(([date]) => date >= start && date <= end)
+        .reduce((sum, [, v]) => sum + Number(v.hours || 0), 0);
+    }
+
     function trimZero(value) {
       const num = Number(value || 0);
       return Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '');
@@ -742,6 +1007,10 @@
       return `${y}-${m}-${d}`;
     }
 
+    function isValidDateKey(dateStr) {
+      return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+    }
+
     function escapeHtml(str) {
       return String(str)
         .replaceAll('&', '&amp;')
@@ -749,6 +1018,12 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
+    }
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      }
     }
 
     window.selectDate = function(date) {
@@ -765,7 +1040,7 @@
       if (!item) return;
       switchTab('input');
       el.studyDate.value = date;
-      el.studyHours.value = item.hours;
+      el.studyHours.value = trimZero(item.hours);
       el.studyNote.value = item.note || '';
       state.selectedDate = date;
       window.scrollTo({ top: 0, behavior: 'smooth' });
