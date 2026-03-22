@@ -1,6 +1,6 @@
 {
-  "name": "공부시간 기록",
-  "short_name": "공부시간",
+  "name": "스터디 플로우",
+  "short_name": "스터디플로우",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f6f7fb",

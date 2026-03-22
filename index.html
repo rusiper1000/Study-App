@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="공부시간 기록" />
+  <meta name="apple-mobile-web-app-title" content="스터디 플로우" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/icon-180.png" />
-  <title>공부시간 기록</title>
+  <title>스터디 플로우</title>
   <style>
     :root {
       --bg:#f6f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
@@ -20,6 +20,12 @@
     .app { max-width:820px; margin:0 auto; padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom)); }
     .hero { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; border-radius:24px; padding:22px 18px; box-shadow:var(--shadow); margin-bottom:16px; }
     .hero h1 { margin:0; font-size:1.6rem; font-weight:800; }
+    .hero-sub { margin-top:6px; font-size:.92rem; opacity:.92; }
+    .dday-box {
+      margin-top:12px; display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.16); color:#fff; padding:10px 12px; border-radius:14px;
+      font-size:.88rem; font-weight:800; backdrop-filter: blur(6px);
+    }
 
     .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0 18px; }
     .summary-card,.card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid rgba(229,231,235,.9); }
@@ -141,7 +147,11 @@
 </head>
 <body>
   <div class="app">
-    <section class="hero"><h1>공부시간 기록</h1></section>
+    <section class="hero">
+      <h1>스터디 플로우</h1>
+      <div class="hero-sub">하루의 공부를 차분하게 쌓아가는 기록장</div>
+      <div class="dday-box" id="heroDday">시험일을 입력하면 D-day가 표시됩니다.</div>
+    </section>
 
     <section class="summary-grid">
       <div class="summary-card"><div class="label">오늘</div><div class="value" id="todayHours">0시간</div></div>
@@ -244,6 +254,30 @@
       </div>
 
       <div class="card">
+        <h2>시험 일정</h2>
+        <div class="form-grid">
+          <div class="row-2">
+            <div>
+              <label for="examTitle">시험명</label>
+              <input id="examTitle" type="text" placeholder="예: 행정사 1차 시험" />
+            </div>
+            <div>
+              <label for="examDate">시험 날짜</label>
+              <input id="examDate" type="date" />
+            </div>
+          </div>
+          <div class="total-box">
+            <div class="label" id="examStatusLabel">현재 등록된 시험</div>
+            <div class="value" id="examDdayDisplay">미설정</div>
+          </div>
+          <div class="btn-row">
+            <button class="action" id="saveExamBtn">시험일 저장</button>
+            <button class="secondary" id="clearExamBtn">삭제</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <h2>백업 / 복원</h2>
         <div class="backup-row">
           <button class="secondary" id="exportBtn">백업 내보내기</button>
@@ -334,8 +368,15 @@
       streakDays: document.getElementById('streakDays'),
       studyDate: document.getElementById('studyDate'),
       studyNote: document.getElementById('studyNote'),
+      examTitle: document.getElementById('examTitle'),
+      examDate: document.getElementById('examDate'),
+      heroDday: document.getElementById('heroDday'),
+      examStatusLabel: document.getElementById('examStatusLabel'),
+      examDdayDisplay: document.getElementById('examDdayDisplay'),
       totalHoursDisplay: document.getElementById('totalHoursDisplay'),
       saveStudyBtn: document.getElementById('saveStudyBtn'),
+      saveExamBtn: document.getElementById('saveExamBtn'),
+      clearExamBtn: document.getElementById('clearExamBtn'),
       exportBtn: document.getElementById('exportBtn'),
       importBtn: document.getElementById('importBtn'),
       importFile: document.getElementById('importFile'),
@@ -377,6 +418,8 @@
     });
 
     el.saveStudyBtn.addEventListener('click', saveStudy);
+    el.saveExamBtn.addEventListener('click', saveExam);
+    el.clearExamBtn.addEventListener('click', clearExam);
     el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
     el.exportBtn.addEventListener('click', exportData);
@@ -443,7 +486,7 @@
               note: String(item.note || '')
             };
           }
-          state.data = { studies };
+          state.data = { studies, exam: parsed.exam || null };
           saveData();
           break;
         } catch {}
@@ -452,7 +495,7 @@
 
     function loadData() {
       try {
-        return sanitizeData(JSON.parse(localStorage.getItem(STORAGE_KEY)) || { studies: {} });
+        return sanitizeData(JSON.parse(localStorage.getItem(STORAGE_KEY)) || { studies: {}, exam: null });
       } catch {
         return { studies: {} };
       }
@@ -461,6 +504,7 @@
     function sanitizeData(data) {
       const studies = {};
       const source = (data && data.studies) || {};
+      const examSource = (data && data.exam) || null;
       for (const [date, item] of Object.entries(source)) {
         if (!isValidDateKey(date)) continue;
         const subjects = normalizeSubjects(item.subjects);
@@ -468,7 +512,11 @@
         const totalHours = computeTotal(subjects);
         studies[date] = { subjects, totalHours, note };
       }
-      return { studies };
+      let exam = null;
+      if (examSource && isValidDateKey(examSource.date || '')) {
+        exam = { title: String(examSource.title || ''), date: String(examSource.date || '') };
+      }
+      return { studies, exam };
     }
 
     function saveData() {
@@ -535,7 +583,7 @@
     function exportData() {
       const payload = {
         app: '공부시간 기록',
-        version: 5,
+        version: 7,
         exportedAt: new Date().toISOString(),
         data: state.data
       };
@@ -573,7 +621,57 @@
       event.target.value = '';
     }
 
+
+    function saveExam() {
+      const title = el.examTitle.value.trim();
+      const date = el.examDate.value;
+      if (!date) return alert('시험 날짜를 선택해 주세요.');
+      state.data.exam = { title, date };
+      saveData();
+      renderExam();
+      alert('시험일이 저장되었습니다.');
+    }
+
+    function clearExam() {
+      state.data.exam = null;
+      saveData();
+      el.examTitle.value = '';
+      el.examDate.value = '';
+      renderExam();
+    }
+
+    function getDdayInfo(exam) {
+      if (!exam || !isValidDateKey(exam.date || '')) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const examDate = new Date(exam.date + 'T00:00:00');
+      const diffDays = Math.round((examDate - today) / 86400000);
+      let label = '';
+      if (diffDays > 0) label = `D-${diffDays}`;
+      else if (diffDays === 0) label = 'D-Day';
+      else label = `D+${Math.abs(diffDays)}`;
+      return { diffDays, label };
+    }
+
+    function renderExam() {
+      const exam = state.data.exam;
+      if (!exam) {
+        el.heroDday.textContent = '시험일을 입력하면 D-day가 표시됩니다.';
+        el.examStatusLabel.textContent = '현재 등록된 시험';
+        el.examDdayDisplay.textContent = '미설정';
+        return;
+      }
+      el.examTitle.value = exam.title || '';
+      el.examDate.value = exam.date || '';
+      const info = getDdayInfo(exam);
+      const title = exam.title ? exam.title : '시험';
+      el.heroDday.textContent = `${title} · ${info.label}`;
+      el.examStatusLabel.textContent = `${title} (${exam.date})`;
+      el.examDdayDisplay.textContent = info.label;
+    }
+
     function renderAll() {
+      renderExam();
       renderSummary();
       renderRecentRecords();
       renderCalendar();
