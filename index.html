@@ -356,6 +356,7 @@
       calendarYear: new Date().getFullYear(),
       calendarMonth: new Date().getMonth(),
       selectedDate: formatDate(new Date()),
+      editingDate: null,
       data: loadData()
     };
 
@@ -562,6 +563,19 @@
     }
 
 
+
+    function clearEntryForm(keepDate = true) {
+      if (!keepDate) {
+        el.studyDate.value = formatDate(new Date());
+      }
+      for (const input of Object.values(el.subjectInputs)) {
+        input.value = '';
+      }
+      el.studyNote.value = '';
+      state.editingDate = null;
+      updateTotalDisplay();
+    }
+
     function saveStudy() {
       const date = el.studyDate.value;
       const subjects = getSubjectInputs();
@@ -572,11 +586,17 @@
       if (totalHours <= 0) return alert('과목별 공부시간을 1개 이상 입력해 주세요.');
       if (totalHours > 24) return alert('하루 총합계는 24시간을 넘을 수 없습니다.');
 
-      state.data.studies[date] = { subjects, totalHours, note };
+      const targetDate = state.editingDate || date;
+      if (state.editingDate && state.editingDate !== date) {
+        delete state.data.studies[state.editingDate];
+      }
+
+      state.data.studies[targetDate] = { subjects, totalHours, note };
       saveData();
-      state.selectedDate = date;
+      state.selectedDate = targetDate;
       renderAll();
-      alert('공부시간이 저장되었습니다.');
+      clearEntryForm(true);
+      alert('저장되었습니다.');
     }
 
 
@@ -733,7 +753,7 @@
           ${subjectBadges(item.subjects)}
           <div class="record-note">${escapeHtml(item.note || '메모 없음')}</div>
           <div class="btn-row">
-            <button class="secondary" onclick="editStudy('${date}')">불러오기</button>
+            <button class="secondary" onclick="beginEditStudy('${date}')">수정</button>
             <button class="danger" onclick="deleteStudy('${date}')">삭제</button>
           </div>
         </div>
@@ -1007,7 +1027,7 @@
       renderSelectedDate();
     };
 
-    window.editStudy = function(date) {
+    window.beginEditStudy = function(date) {
       const item = state.data.studies[date];
       if (!item) return;
       switchTab('input');
@@ -1015,6 +1035,7 @@
       setSubjectInputs(item.subjects);
       el.studyNote.value = item.note || '';
       state.selectedDate = date;
+      state.editingDate = date;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
