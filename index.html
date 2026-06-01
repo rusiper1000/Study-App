@@ -489,6 +489,27 @@
     el.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     el.nextMonthBtn.addEventListener('click', () => changeMonth(1));
 
+    // 날짜 변경 시 기존 기록 자동 불러오기
+    el.studyDate.addEventListener('change', function() {
+      const date = this.value;
+      if (!date) return;
+      const existing = state.data.studies[date];
+      if (existing) {
+        setSubjectInputs(existing.subjects);
+        el.studyNote.value = existing.note || '';
+        state.editingDate = date;
+        showToast('기존 기록을 불러왔습니다. 수정 후 저장하세요.');
+      } else {
+        // 새 날짜면 입력창 초기화 (단, 수동으로 지우지 않게 주의)
+        if (state.editingDate) {
+          setSubjectInputs({});
+          el.studyNote.value = '';
+          state.editingDate = null;
+        }
+      }
+      updateTotalDisplay();
+    });
+
     // 캘린더 스와이프 제스처 (좌/우)
     (function() {
       const grid = document.getElementById('panel-calendar');
@@ -516,6 +537,13 @@
       migrateOldData();
       const today = formatDate(new Date());
       el.studyDate.value = today;
+      // 오늘 기록이 있으면 자동 불러오기
+      const todayData = state.data.studies[today];
+      if (todayData) {
+        setSubjectInputs(todayData.subjects);
+        el.studyNote.value = todayData.note || '';
+        state.editingDate = today;
+      }
       updateTotalDisplay();
       renderAll();
     }
@@ -651,14 +679,20 @@
 
 
     function clearEntryForm(keepDate = true) {
-      if (!keepDate) {
-        el.studyDate.value = formatDate(new Date());
+      const today = formatDate(new Date());
+      el.studyDate.value = today;
+      const todayData = state.data.studies[today];
+      if (todayData) {
+        setSubjectInputs(todayData.subjects);
+        el.studyNote.value = todayData.note || '';
+        state.editingDate = today;
+      } else {
+        for (const input of Object.values(el.subjectInputs)) {
+          input.value = '';
+        }
+        el.studyNote.value = '';
+        state.editingDate = null;
       }
-      for (const input of Object.values(el.subjectInputs)) {
-        input.value = '';
-      }
-      el.studyNote.value = '';
-      state.editingDate = null;
       updateTotalDisplay();
     }
 
@@ -682,7 +716,7 @@
       state.selectedDate = targetDate;
       renderAll();
       clearEntryForm(true);
-      alert('저장되었습니다.');
+      showToast('저장되었습니다 ✓');
     }
 
 
@@ -1079,6 +1113,20 @@
       return Object.entries(state.data.studies)
         .filter(([date]) => date >= start && date <= end)
         .reduce((sum, [, item]) => sum + Number(item.totalHours || 0), 0);
+    }
+
+    function showToast(msg, duration = 2400) {
+      let t = document.getElementById('_toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = '_toast';
+        t.style.cssText = 'position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#1e293b;color:#f1f5f9;padding:11px 20px;border-radius:12px;font-size:.9rem;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88vw;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.25);';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.opacity = '0'; }, duration);
     }
 
     function trimZero(value) {
